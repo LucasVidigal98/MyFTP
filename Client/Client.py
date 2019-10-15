@@ -17,6 +17,7 @@ LOGIN_NOT_FOUND = 'LOGIN_NOT_FOUND';        #Login não encontrado
 
 
 login = False					 	#Verfica se o usuário está conectado ao servidor
+user = ''
 
 #Tenta fazer conexão com o servidor
 try:
@@ -53,6 +54,7 @@ while True:
 		if id_msg == LOGIN_EXISTS:	#Login Existe
 			print('Login Realizado com sucesso')
 			login = True
+			user = content_request[1]
 			continue
 		else:
 			print('Login não existente: Usuário ou senha Inválidos')	#Login não existe
@@ -65,6 +67,7 @@ while True:
 			print('Você não tem permissao para o comando: ' + content_request[0] + ' - Faça o login $> login <user> <passwd>')
 			continue
 
+		request += ' ' + user
 		ftp_socket.send(request)		#Eniva a requisição
 
 		full_msg = ''
@@ -105,7 +108,7 @@ while True:
 				exit(1)
 
 			#Cria a requisição de dowload
-			request = 'get_ ' + content_request[1]
+			request = 'get_ ' + content_request[1] + ' ' + user
 			ftp_socket.send(request)
 
 			#Recebe os bytes do arquivo
