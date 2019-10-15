@@ -14,10 +14,13 @@ CONTENT_NOT_AVAILBE = 'CONTENT_NOT_AVAILBE' #Conteúdo não disponível
 EOF = 'EOF';                    			#Fim do arquivo
 LOGIN_EXISTS = 'LOGIN_EXISTS';           	#Login encontrado
 LOGIN_NOT_FOUND = 'LOGIN_NOT_FOUND';        #Login não encontrado
+FAIL_UPLOAD = 'FAIL_UPLOAD'					#Erro ao recber um upload de um arquivo
+SUCESS_UPLOAD = 'SUCESS_UPLOAD'				#Upload de arquivo feito com sucsesso
+
 
 
 login = False					 	#Verfica se o usuário está conectado ao servidor
-user = ''
+user = ''							#Usuário que está logado no momento da execução
 
 #Tenta fazer conexão com o servidor
 try:
@@ -149,6 +152,58 @@ while True:
 	elif content_request[0] == 'q' or content_request[0] == 'quit':
 		ftp_socket.close()
 		exit(0)
+
+	elif content_request[0] == 'put':	#Comando para fazer upload de um arquivo para o servidor
+
+		if len(content_request) > 2: #Concatena os espaços da requisição
+			for i in range(2, len(content_request)):
+				content_request[1] += ' ' + content_request[i]
+
+		exists = False
+		try: #Verificar se o arquivo está local do cliente
+			with open('Files/' + content_request[1], 'rb') as file:
+				msg_file = file.read()
+				exists = True
+		except:
+			exists = False
+			continue
+
+		if exists == True:	#Encontrou o arquivo, avisa o servidor que o client irá realizar um 'PUT'
+			ftp_socket.send(content_request[0])
+		else:				#Não encontrou o arquivo
+			print('Arquivo não encontrado')
+			continue
+
+		msg = ftp_socket.recv(1024)
+
+		if msg.decode('utf-8') == 'OK':
+
+			#Renicia a conexão com o servidor para iniciar o upload
+			try:	
+				ftp_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+				ftp_socket.connect(addr)
+			except:
+				print('Erro ao conetar ao com o servidor')
+				exit(1)
+
+			print('Relaziando upload do arquivo ' + content_request[1])
+
+			request = 'put_ ' + content_request[1] + ' ' +  msg_file + ' ' + user
+			ftp_socket.send(request) 		#Envia a requisição
+
+			ftp_socket.send(msg_file) 		#Envia a menssagem com o conteúdo do arquivo
+
+			success = ftp_socket.recv(1024)	#Rece a resposta do servidor sobre o upload
+
+			if success == 'SUCESS_UPLOAD':
+				print('Upload terminado com sucesso!')
+			else:
+				print('Falha ao fazer Upload do arquivo ' + content_request[1])
+				continue
+
+		else:
+			print('Falha ao fazer Upload do arquivo ' + content_request[1])
+			continue
 
 	else:
 		print('Comando não reconhecido: ' + str(request[0]))

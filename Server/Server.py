@@ -2,6 +2,7 @@
 import socket
 from OperationsServer import *
 import random
+import os
 
 successful = False	#Vefica se encontrou uma porta válida
 
@@ -29,6 +30,8 @@ CONTENT_NOT_AVAILBE = 'CONTENT_NOT_AVAILBE' #Conteúdo não disponível
 EOF = 'EOF';                    			#Fim do arquivo
 LOGIN_EXISTS = 'LOGIN_EXISTS';           	#Login encontrado
 LOGIN_NOT_FOUND = 'LOGIN_NOT_FOUND';        #Login não encontrado
+FAIL_UPLOAD = 'FAIL_UPLOAD'					#Erro ao recber um upload de um arquivo
+SUCESS_UPLOAD = 'SUCESS_UPLOAD'				#Upload de arquivo feito com sucsesso
 
 print('Server Started PORT: '+ str(PORT))
 
@@ -39,10 +42,18 @@ while True:
 	print('Conectado')
 	print('Aguardando Requisição')
 	#Espera requisição
-	req = conex.recv(1024)
+	req = conex.recv(1000000)
 	request = str(req.decode('utf-8')).split(' ')
+	print(req)
+	print(request)
 	
 	if request[0] == 'login':	#Validação de login
+
+		try:
+			#Se for o primeiro login desse usuário no servidor criar um diretório para ele	
+			os.mkdir('Users_dir/' + request[1])
+		except:
+			pass
 
 		validation = login_validator(str(req.decode('utf-8')))
 		print(validation)
@@ -53,14 +64,14 @@ while True:
 
 	elif request[0] == 'ls':  #Lista diretório
 
-		str_list = list_dir()
+		str_list = list_dir(request[1])
 
 		conex.send(bytes(str_list, 'utf-8')) #Envia a listagem do diretorio
 
 	elif request[0] == 'get':	#Verifica se o arquivo existe
 
 		if len(request) > 2: #Concatena os espaços da requisição
-			for i in range(2, len(request)):
+			for i in range(2, len(request)-1):
 				request[1] += ' ' + request[i]
 
 		try:
@@ -76,12 +87,41 @@ while True:
 	elif request[0] == 'get_':	#Força dowload se arquivo existir
 
 		if len(request) > 2: #Concatena os espaços da requisição
-			for i in range(2, len(request)):
+			for i in range(2, len(request)-1):
 				request[1] += ' ' + request[i]
 
-		content_file = read_file(request[1])	#Recece o conteúdo do arquivo
+		content_file = read_file(request[1], request[len(request)-1])	#Recece o conteúdo do arquivo
 
 		if content_file == False:				#Falso = Não foi possível baixar o conteúdo
 			conex.send(bytes(CONTENT_NOT_AVAILBE, 'utf-8'))
 		else:
 			conex.send(bytes(content_file))
+
+	elif request[0] == 'put':
+
+		conex.send(bytes('OK', 'utf-8')) #Manda uma mensagem positiva para o cliente
+
+	elif request[0] == 'put_':		#Força o recebimento de um arquivo do cliente
+
+		print(req)
+		print(request)
+
+		if len(request) > 2: #Concatena os espaços da requisição
+			for i in range(2, len(request)-1):
+				request[1] += ' ' + request[i]
+
+		full_msg = ''
+		while True:	#Recebe os bytes da menssagem
+
+			msg_file = ftp_socket.recv(1000000)
+			full_msg += msg_file
+
+			if len(msg) < 1000000:
+				break
+
+		success = upload_file(request[1], full_msg, request[len(request)-1])	#Salva o arquivo no diretório do cliente
+
+		if success == True:
+			conex.send(bytes(SUCESS_UPLOAD, 'utf-8'))
+		else:
+			conex.send(bytes(FAIL_UPLOAD, 'utf-8'))
