@@ -95,6 +95,7 @@ while True:
 			continue
 
 		#Verficar se o arquivo existe
+		request += ' ' + user
 		ftp_socket.send(request)			#Envia a requisição
 		msg = ftp_socket.recv(1024)			#Recbe a resposta se o arquivo existe ou não
 
@@ -111,6 +112,10 @@ while True:
 				exit(1)
 
 			#Cria a requisição de dowload
+			if len(content_request) > 2:	#Concatena os espaços das strings
+				for i in range(2, len(content_request)):
+					content_request[1] += ' ' + content_request[i]
+
 			request = 'get_ ' + content_request[1] + ' ' + user
 			ftp_socket.send(request)
 
@@ -141,6 +146,7 @@ while True:
 			try:	#Escreve no arquivo o conteúdo recebido do servidor
 				with open('Files/' + str(content_request[1]), 'wb') as file:
 					file.write(full_msg)
+					file.close()
 			except:
 				print('Falha ao fazer download de arquivo: ' + str(content_request[1]))
 
@@ -149,61 +155,60 @@ while True:
 		else:
 			print('Arquivo não Disponível no servidor')
 
-	elif content_request[0] == 'q' or content_request[0] == 'quit':
-		ftp_socket.close()
-		exit(0)
-
 	elif content_request[0] == 'put':	#Comando para fazer upload de um arquivo para o servidor
+
+		if login == False:
+			print('Você não tem permissao para o comando: ' + content_request[0] + ' - Faça o login $> login <user> <passwd>')
+			continue
 
 		if len(content_request) > 2: #Concatena os espaços da requisição
 			for i in range(2, len(content_request)):
 				content_request[1] += ' ' + content_request[i]
-
+			request = 	'put ' + content_request[1] + ' ' + user
+		else:
+			request += ' ' + user
+		
 		exists = False
+		msg_file = ''
+
 		try: #Verificar se o arquivo está local do cliente
 			with open('Files/' + content_request[1], 'rb') as file:
 				msg_file = file.read()
 				exists = True
+				file.close()
 		except:
 			exists = False
 			continue
 
 		if exists == True:	#Encontrou o arquivo, avisa o servidor que o client irá realizar um 'PUT'
-			ftp_socket.send(content_request[0])
+			ftp_socket.send(request)
 		else:				#Não encontrou o arquivo
 			print('Arquivo não encontrado')
 			continue
 
-		msg = ftp_socket.recv(1024)
+		#Renicia a conexão com o servidor para iniciar o upload
+		try:	
+			ftp_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+			ftp_socket.connect(addr)
+		except:
+			print('Erro ao conetar ao com o servidor')
+			exit(1)
 
-		if msg.decode('utf-8') == 'OK':
+		print('Relaziando upload do arquivo ' + content_request[1])
 
-			#Renicia a conexão com o servidor para iniciar o upload
-			try:	
-				ftp_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-				ftp_socket.connect(addr)
-			except:
-				print('Erro ao conetar ao com o servidor')
-				exit(1)
+		ftp_socket.send(bytes(msg_file))		#Envia a menssagem com o conteúdo do arquivo
 
-			print('Relaziando upload do arquivo ' + content_request[1])
+		success = ftp_socket.recv(1024)	#Rece a resposta do servidor sobre o upload
 
-			request = 'put_ ' + content_request[1] + ' ' +  msg_file + ' ' + user
-			ftp_socket.send(request) 		#Envia a requisição
-
-			ftp_socket.send(msg_file) 		#Envia a menssagem com o conteúdo do arquivo
-
-			success = ftp_socket.recv(1024)	#Rece a resposta do servidor sobre o upload
-
-			if success == 'SUCESS_UPLOAD':
-				print('Upload terminado com sucesso!')
-			else:
-				print('Falha ao fazer Upload do arquivo ' + content_request[1])
-				continue
-
+		if success == 'SUCESS_UPLOAD':
+			print('Upload terminado com sucesso!')
 		else:
 			print('Falha ao fazer Upload do arquivo ' + content_request[1])
 			continue
 
+	elif content_request[0] == 'q' or content_request[0] == 'quit':
+		ftp_socket.close()
+		exit(0)
+
 	else:
-		print('Comando não reconhecido: ' + str(request[0]))
+		print('Comando não reconhecido: ' + str(content_request[0]))
