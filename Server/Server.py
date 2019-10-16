@@ -42,22 +42,19 @@ while True:
 	print('Conectado')
 	print('Aguardando Requisição')
 	#Espera requisição
-	req = conex.recv(1000000)
+	req = conex.recv(1024)
 	request = str(req.decode('utf-8')).split(' ')
-	print(req)
-	print(request)
-	
+
 	if request[0] == 'login':	#Validação de login
 
-		try:
-			#Se for o primeiro login desse usuário no servidor criar um diretório para ele	
-			os.mkdir('Users_dir/' + request[1])
-		except:
-			pass
-
 		validation = login_validator(str(req.decode('utf-8')))
-		print(validation)
+		
 		if validation == True:	#Login existe
+			try:
+				#Se for o primeiro login desse usuário no servidor criar um diretório para ele	
+				os.mkdir('Users_dir/' + request[1])
+			except:
+				pass
 			conex.send(bytes(LOGIN_EXISTS, 'utf-8'))
 		else:					#Login não existe
 			conex.send(bytes(LOGIN_NOT_FOUND, 'utf-8'))
@@ -69,13 +66,14 @@ while True:
 		conex.send(bytes(str_list, 'utf-8')) #Envia a listagem do diretorio
 
 	elif request[0] == 'get':	#Verifica se o arquivo existe
-
+		
 		if len(request) > 2: #Concatena os espaços da requisição
 			for i in range(2, len(request)-1):
 				request[1] += ' ' + request[i]
-
+				print(request[1])
+				
 		try:
-			file_validation = is_file(request[1])
+			file_validation = is_file(request[1], request[len(request)-1])
 
 			if file_validation == True:		#Arquivo existe
 				conex.send(bytes(FILE_EXISTS, 'utf-8'))
@@ -99,22 +97,17 @@ while True:
 
 	elif request[0] == 'put':
 
-		conex.send(bytes('OK', 'utf-8')) #Manda uma mensagem positiva para o cliente
-
-	elif request[0] == 'put_':		#Força o recebimento de um arquivo do cliente
-
-		print(req)
-		print(request)
-
-		if len(request) > 2: #Concatena os espaços da requisição
-			for i in range(2, len(request)-1):
-				request[1] += ' ' + request[i]
-
-		full_msg = ''
-		while True:	#Recebe os bytes da menssagem
-
-			msg_file = ftp_socket.recv(1000000)
-			full_msg += msg_file
+		print('Aguardando conexao ... put')
+		conex, client = s.accept()
+		print('Conectado ... put')
+		print('Aguardando Requisição ... put')
+		#Espera requisição
+		
+		full_msg = bytes('', 'utf-8')
+		while True:		#Recebe os bytes do arquivo de upload
+			
+			msg = conex.recv(1000000)
+			full_msg += msg
 
 			if len(msg) < 1000000:
 				break

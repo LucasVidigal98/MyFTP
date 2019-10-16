@@ -1,3 +1,4 @@
+# -*- coding: UTF-8 -*-
 import os
 
 def login_validator(request):
@@ -18,40 +19,45 @@ def login_validator(request):
 def list_dir(user):
 
 	str_file = ''
-	print(user)
+	found_files = False
 	try:
 		for name_file in os.listdir(r'Users_dir/'+user):
+			found_files = True
 			str_file += str(name_file) + '\n'
 	except:
 		str_file = 'O diretório do servidor está vazio'
 
+	if found_files == False:
+		return 'O diretório do servidor está vazio'
+
 	return str_file
 
-def is_file(name_file):
-
+def is_file(name_file, user):
+	
 	try:
-		with open('Files/' + str(name_file), 'r') as file:
+		with open('Users_dir/' + user + '/' + str(name_file), 'rb') as file:
 			return True
 	except:
+		print('here')
 		return False
 
 def read_file(name_file, user):
 
 	try:
 		with open('Users_dir/' + user + '/' + str(name_file), 'rb') as file:
-			print('aqui')
 			msg = file.read()
+			file.close()
 	except:
-		print('zorua')
 		return False
 
 	return msg
 
-def upload_flie(name_file, content_file, user):
+def upload_file(name_file, content_file, user):
 
 	try:
 		with open('Users_dir/' + user + '/' + str(name_file), 'wb') as file:
 			file.write(content_file)
+			file.close()
 	except:
 		return False #Não conssegui fazer o upload
 	
