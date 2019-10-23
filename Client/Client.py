@@ -206,4 +206,4 @@ while True:
 			continue
 
 	else:
-		print('Comando não reconhecido: ' + str(request[0]))
+		print('Comando não reconhecido: ' + str(content_request[0]))
