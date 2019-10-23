@@ -29,12 +29,7 @@ while True:
 	
 	print('Aguardando conexao')
 	conex, client = s.accept()
-	print('Conectado')
-	print('Aguardando Requisição')
-	#Espera requisição
-	req = conex.recv(1024)
-	request = str(req.decode('utf-8')).split(' ')
 
 	#Inicia a thread do server
-	t = ThreadServer(0, request, conex, s)
+	t = ThreadServer(conex, s)
 	t.start()
