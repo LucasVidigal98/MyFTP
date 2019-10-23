@@ -95,7 +95,7 @@ while True:
 			continue
 
 		#Verficar se o arquivo existe
-		request += user
+		request += ' ' + user
 		ftp_socket.send(request)			#Envia a requisição
 		msg = ftp_socket.recv(1024)			#Recbe a resposta se o arquivo existe ou não
 
@@ -110,6 +110,10 @@ while True:
 			except:
 				print('Erro ao conetar ao com o servidor')
 				exit(1)
+
+			if len(content_request) > 2: #Concatena os espaços da requisição
+				for i in range(2, len(content_request)):
+					content_request[1] += ' ' + content_request[i]
 
 			#Cria a requisição de dowload
 			request = 'get_ ' + content_request[1] + ' ' + user
@@ -134,10 +138,6 @@ while True:
 				os.mkdir(r'Files')
 			except:
 				pass
-
-			if len(content_request) > 2: #Concatena os espaços da requisição
-				for i in range(2, len(content_request)):
-					content_request[1] += ' ' + content_request[i]
 
 			try:	#Escreve no arquivo o conteúdo recebido do servidor
 				with open('Files/' + str(content_request[1]), 'wb') as file:
@@ -167,7 +167,7 @@ while True:
 				exists = True
 		except:
 			exists = False
-			continue
+			pass
 
 		if exists == True:	#Encontrou o arquivo, avisa o servidor que o client irá realizar um 'PUT'
 			ftp_socket.send(content_request[0])
@@ -180,7 +180,9 @@ while True:
 		if msg.decode('utf-8') == 'OK':
 
 			#Renicia a conexão com o servidor para iniciar o upload
+			print('Entrou')
 			try:	
+				print('aquiss')
 				ftp_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 				ftp_socket.connect(addr)
 			except:
