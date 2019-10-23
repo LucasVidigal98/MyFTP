@@ -95,6 +95,7 @@ while True:
 			continue
 
 		#Verficar se o arquivo existe
+		request += user
 		ftp_socket.send(request)			#Envia a requisição
 		msg = ftp_socket.recv(1024)			#Recbe a resposta se o arquivo existe ou não
 

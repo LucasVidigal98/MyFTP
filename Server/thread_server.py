@@ -81,6 +81,7 @@ class ThreadServer(threading.Thread):
 					self.request[1] += ' ' + self.request[i]
 					print(self.request[1])
 				
+				print(self.request)
 			try:
 				file_valid_Threadation = is_file(self.request[1], self.request[len(self.request)-1])
 
