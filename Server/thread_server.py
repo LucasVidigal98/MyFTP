@@ -18,11 +18,12 @@ SUCESS_UPLOAD = 'SUCESS_UPLOAD'				#Upload de arquivo feito com sucsesso
 
 class ThreadServer(threading.Thread):
 
-	def __init__(self, id_Thread, request, conex):
+	def __init__(self, id_Thread, request, conex, s):
 		super(ThreadServer, self).__init__()
 		self.id_Thread = id_Thread 					#id da thread
 		self.request = request						#Requição recebida
 		self.conex = conex							#Conexão com o cliente
+		self.s = s 									#Socket da conexão
 
 
 	def run(self):
@@ -30,23 +31,23 @@ class ThreadServer(threading.Thread):
 		if self.id_Thread == 0: #Thread que abre a conexão com cliente, id_Threadentid_Threadica a requisição e encaminha para a thread específica
 
 			if self.request[0] == 'login':	#Aciona a thread de valid_Threadação de login
-				t = ThreadServer(1, self.request, self.conex)
+				t = ThreadServer(1, self.request, self.conex, self.s)
 				t.start()
 
 			elif self.request[0] == 'ls':	#Aciona a thread para o comando ls
-				t = ThreadServer(2, self.request, self.conex)
+				t = ThreadServer(2, self.request, self.conex, self.s)
 				t.start()
 
 			elif self.request[0] == 'get': 	#Aciona a thread para o comando get
-				t = ThreadServer(3, self.request, self.conex)
+				t = ThreadServer(3, self.request, self.conex, self.s)
 				t.start()
 
 			elif self.request[0] == 'get_': 	#Aciona a thread para o comando get_
-				t = ThreadServer(4, self.request, self.conex)
+				t = ThreadServer(4, self.request, self.conex, self.s)
 				t.start()
 
 			elif self.request[0] == 'put'	:#Aciona a thread para o comando put
-				t = ThreadServer(5, self.request, self.conex)
+				t = ThreadServer(5, self.request, self.conex, self.s)
 				t.start()
 
 		elif self.id_Thread == 1:
@@ -108,7 +109,7 @@ class ThreadServer(threading.Thread):
 		elif self.id_Thread == 5: #Thread put
 
 			print('Aguardando conexao ... put')
-			self.conex, client = s.accept()
+			self.conex, client = self.s.accept()
 			print('Conectado ... put')
 			print('Aguardando Requisição ... put')
 			#Espera requisição

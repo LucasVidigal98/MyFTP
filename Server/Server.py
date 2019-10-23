@@ -23,17 +23,6 @@ while successful == False:
 	except:
 		continue
 
-#RESPONSE MESSAGE#
-FILE_EXISTS = 'FILE_EXISTS';            	#Arquivo existe
-FILE_NOT_FOUND = 'FILE_NOT_FOUND';         	#Arquivo não existe
-CONTENT_AVAILBE = 'CONTENT_AVAILBE';        #Contéudo disponível
-CONTENT_NOT_AVAILBE = 'CONTENT_NOT_AVAILBE' #Conteúdo não disponível
-EOF = 'EOF';                    			#Fim do arquivo
-LOGIN_EXISTS = 'LOGIN_EXISTS';           	#Login encontrado
-LOGIN_NOT_FOUND = 'LOGIN_NOT_FOUND';        #Login não encontrado
-FAIL_UPLOAD = 'FAIL_UPLOAD'					#Erro ao recber um upload de um arquivo
-SUCESS_UPLOAD = 'SUCESS_UPLOAD'				#Upload de arquivo feito com sucsesso
-
 print('Server Started PORT: '+ str(PORT))
 
 while True:
@@ -47,5 +36,5 @@ while True:
 	request = str(req.decode('utf-8')).split(' ')
 
 	#Inicia a thread do server
-	t = ThreadServer(0, request, conex)
+	t = ThreadServer(0, request, conex, s)
 	t.start()
