@@ -38,7 +38,6 @@ def is_file(name_file, user):
 		with open('Users_dir/' + user + '/' + str(name_file), 'rb') as file:
 			return True
 	except:
-		print('here')
 		return False
 
 def read_file(name_file, user):

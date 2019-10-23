@@ -111,6 +111,10 @@ while True:
 				print('Erro ao conetar ao com o servidor')
 				exit(1)
 
+			if len(content_request) > 2: #Concatena os espaços da requisição
+				for i in range(2, len(content_request)):
+					content_request[1] += ' ' + content_request[i]
+
 			#Cria a requisição de dowload
 			if len(content_request) > 2:	#Concatena os espaços das strings
 				for i in range(2, len(content_request)):
@@ -138,10 +142,6 @@ while True:
 				os.mkdir(r'Files')
 			except:
 				pass
-
-			if len(content_request) > 2: #Concatena os espaços da requisição
-				for i in range(2, len(content_request)):
-					content_request[1] += ' ' + content_request[i]
 
 			try:	#Escreve no arquivo o conteúdo recebido do servidor
 				with open('Files/' + str(content_request[1]), 'wb') as file:
