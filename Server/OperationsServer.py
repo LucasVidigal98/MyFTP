@@ -1,18 +1,24 @@
 # -*- coding: UTF-8 -*-
 import os
+import MySQLdb
+
+host = "localhost"
+user = "root"
+password = ""
+db = "users"
+port = 3306
+
+conex = MySQLdb.connect(host, user, password, db, port)
+c = conex.cursor(MySQLdb.cursors.DictCursor)
 
 def login_validator(request):
 
-	file = open('users.txt', 'r')
+	global c
+
 	content_request = request.split()
-
-	for line in file:
-
-		values = line.split(' ')
-
-		if str(content_request[1]) == str(values[0]):
-			if str(content_request[2]) == str(values[1][:str(values[1]).find('\n')]):
-				return True
+	query = 'SELECT ' + 'passwd' + ' FROM ' + 'user' + ' WHERE login =  ' + content_request[1]
+	c.excecute(query)
+	print(c.fetchall()) 
 
 	return False
 
