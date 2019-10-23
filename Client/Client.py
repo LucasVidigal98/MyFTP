@@ -156,32 +156,9 @@ while True:
 
 	elif content_request[0] == 'put':	#Comando para fazer upload de um arquivo para o servidor
 
-		if len(content_request) > 2: #Concatena os espaços da requisição
-			for i in range(2, len(content_request)):
-				content_request[1] += ' ' + content_request[i]
-
-		exists = False
-		try: #Verificar se o arquivo está local do cliente
-			with open('Files/' + content_request[1], 'rb') as file:
-				msg_file = file.read()
-				exists = True
-		except:
-			exists = False
-			pass
-
-		if exists == True:	#Encontrou o arquivo, avisa o servidor que o client irá realizar um 'PUT'
-			ftp_socket.send(content_request[0])
-		else:				#Não encontrou o arquivo
-			print('Arquivo não encontrado')
+		if login == False:
+			print('Você não tem permissao para o comando: ' + content_request[0] + ' - Faça o login $> login <user> <passwd>')
 			continue
-
-		msg = ftp_socket.recv(1024)
-
-		if msg.decode('utf-8') == 'OK':
-
-			if login == False:
-				print('Você não tem permissao para o comando: ' + content_request[0] + ' - Faça o login $> login <user> <passwd>')
-				continue
 
 		if len(content_request) > 2: #Concatena os espaços da requisição
 			for i in range(2, len(content_request)):
@@ -227,6 +204,11 @@ while True:
 		else:
 			print('Falha ao fazer Upload do arquivo ' + content_request[1])
 			continue
+
+	elif content_request[0] == 'q' or content_request[0] == 'quit':
+		ftp_socket.close()
+		exit(0)
+
 
 	elif content_request[0] == 'q' or content_request[0] == 'quit':
 		ftp_socket.close()
