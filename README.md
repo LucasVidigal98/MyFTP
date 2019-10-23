@@ -27,3 +27,5 @@ O protocolo MyFTP implementa os seguintes comandos:
 Todos os comandos devem tratam possíveis erros, tais como: usuário/senha 
 incorreta ou nome de arquivo inexistente. Não navega nas pastas. 
 Não Suporta múltiplos usuários conectados no servidor. 
+
+Cliente esá rodando na versão 2 do python e, o servidor na versão 3. Ao fazer put ou get de um arquivo utilizar o nome + a extenção do arquivo. Ex: "MyFile.pdf".

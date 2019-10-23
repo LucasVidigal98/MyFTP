@@ -116,6 +116,10 @@ while True:
 					content_request[1] += ' ' + content_request[i]
 
 			#Cria a requisição de dowload
+			if len(content_request) > 2:	#Concatena os espaços das strings
+				for i in range(2, len(content_request)):
+					content_request[1] += ' ' + content_request[i]
+
 			request = 'get_ ' + content_request[1] + ' ' + user
 			ftp_socket.send(request)
 
@@ -142,6 +146,7 @@ while True:
 			try:	#Escreve no arquivo o conteúdo recebido do servidor
 				with open('Files/' + str(content_request[1]), 'wb') as file:
 					file.write(full_msg)
+					file.close()
 			except:
 				print('Falha ao fazer download de arquivo: ' + str(content_request[1]))
 
@@ -149,10 +154,6 @@ while True:
 
 		else:
 			print('Arquivo não Disponível no servidor')
-
-	elif content_request[0] == 'q' or content_request[0] == 'quit':
-		ftp_socket.close()
-		exit(0)
 
 	elif content_request[0] == 'put':	#Comando para fazer upload de um arquivo para o servidor
 
@@ -204,11 +205,6 @@ while True:
 		else:
 			print('Falha ao fazer Upload do arquivo ' + content_request[1])
 			continue
-
-	elif content_request[0] == 'q' or content_request[0] == 'quit':
-		ftp_socket.close()
-		exit(0)
-
 
 	elif content_request[0] == 'q' or content_request[0] == 'quit':
 		ftp_socket.close()
