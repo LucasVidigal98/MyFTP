@@ -15,6 +15,12 @@ LOGIN_EXISTS = 'LOGIN_EXISTS';           	#Login encontrado
 LOGIN_NOT_FOUND = 'LOGIN_NOT_FOUND';        #Login não encontrado
 FAIL_UPLOAD = 'FAIL_UPLOAD'					#Erro ao recber um upload de um arquivo
 SUCESS_UPLOAD = 'SUCESS_UPLOAD'				#Upload de arquivo feito com sucsesso
+ADD_SUCCESS = 'ADD_SUCCESS'					#Usuário adicionado com sucesso no servidor
+ADD_FAIL = 	'ADD_FAIL'						#Falha ao adicionar o usuário no sistema
+RM_SUCCES = 'RM_SUCCES'						#Usuário removido com sucesso
+RM_FAIL = 'RM_FAIL'							#Falha ao remover usuário
+PASSWD_SUCCESS = 'PASSWD_SUCCESS'			#Sucesso ao redefinir senha
+PASSWD_FAIL = 'PASSWD_FAIL'					#Falha ao redefinir senha
 
 class ThreadServer(threading.Thread):
 
@@ -72,7 +78,7 @@ class ThreadServer(threading.Thread):
 				self.conex.send(bytes(FILE_NOT_FOUND, 'utf-8'))
 
 		elif request[0] == 'get_':
-			'''
+			
 			t = ThreadService(0, request, self.conex, self.s)	#Aciona a thread de download
 			t.start()
 
@@ -87,11 +93,11 @@ class ThreadServer(threading.Thread):
 				self.conex.send(bytes(CONTENT_NOT_AVAILBE, 'utf-8'))
 			else:
 				self.conex.send(bytes(content_file))
-			
+			'''
 
 		elif request[0] == 'put':
 
-			'''
+			
 			t = ThreadService(1, request, self.conex, self.s)	#Aciona a thread de upload
 			t.start()
 			'''
@@ -116,3 +122,45 @@ class ThreadServer(threading.Thread):
 				self.conex.send(bytes(SUCESS_UPLOAD, 'utf-8'))
 			else:
 				self.conex.send(bytes(FAIL_UPLOAD, 'utf-8'))
+				'''
+
+		elif request[0] == 'adduser':	#Comando para adicionar um usuário
+
+			if len(request) > 2:
+				self.conex.send(bytes(ADD_FAIL, 'utf-8'))
+
+			add = add_user(str(request[1])) #Adiciona o user no banco de dados
+
+			if add == True:
+				self.conex.send(bytes(ADD_SUCCESS, 'utf-8'))
+			else:
+				self.conex.send(bytes(ADD_FAIL, 'utf-8'))
+
+		elif request[0] == 'removeuser':	#Comando para remover um usuário
+
+			if len(request) > 2:
+				self.conex.send(bytes(RM_FAIL, 'utf-8'))
+
+			rm = remove_user(str(request[1])) #Remove usuário do banco de dados
+
+			if rm == False:
+				self.conex.send(bytes(RM_FAIL, 'utf-8'))
+			else:
+				#Apaga o diretório do usuário no servidor
+				list_files = os.listdir(r'Users_dir/'+request[1]+'/')
+				for file in list_files:
+					os.remove(r'Users_dir/'+request[1]+'/'+str(file))
+				os.rmdir(r'Users_dir/'+request[1]+'/')
+				self.conex.send(bytes(RM_SUCCES, 'utf-8'))
+
+		elif request[0] == 'passwd':
+
+			if len(request) > 3:
+				self.conex.send(bytes(PASSWD_FAIL, 'utf-8'))
+
+			passwd = passwd_r(str(request[1]), str(request[2]))
+
+			if passwd == False:
+				self.conex.send(bytes(PASSWD_FAIL, 'utf-8'))
+			else:
+				self.conex.send(bytes(PASSWD_SUCCESS, 'utf-8'))

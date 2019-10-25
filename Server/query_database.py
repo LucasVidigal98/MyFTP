@@ -4,7 +4,7 @@ conn = sqlite3.connect('usuario.db')
 cursor = conn.cursor()
 
 #criando a tabela de usuarios
-'''
+
 cursor.execute("""
 CREATE TABLE users(	
 	id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
@@ -13,24 +13,12 @@ CREATE TABLE users(
 	);
 	""")
 print('Tabela criada com sucesso')
-'''
 
+#Adicionando usuário administrador
 cursor.execute("""
 INSERT INTO users (login, passwd)
 VALUES ('admin', 'admin')
 """)
 
-cursor.execute("""
-INSERT INTO users (login, passwd)
-VALUES ('fulano1', '123')
-""")
-
-cursor = conn.cursor()
-cursor.execute("""
-		SELECT * FROM users;
-	""")
-
-x = cursor.fetchall()
-print(x)
-
+conn.commit()
 conn.close()
