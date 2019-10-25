@@ -15,9 +15,13 @@ EOF = 'EOF';                    			#Fim do arquivo
 LOGIN_EXISTS = 'LOGIN_EXISTS';           	#Login encontrado
 LOGIN_NOT_FOUND = 'LOGIN_NOT_FOUND';        #Login não encontrado
 FAIL_UPLOAD = 'FAIL_UPLOAD'					#Erro ao recber um upload de um arquivo
-SUCESS_UPLOAD = 'SUCESS_UPLOAD'				#Upload de arquivo feito com sucsesso
-
-
+SUCCESS_UPLOAD = 'SUCESS_UPLOAD'			#Upload de arquivo feito com sucsesso
+ADD_SUCCESS = 'ADD_SUCCESS'					#Usuário adicionado com sucesso no servidor
+ADD_FAIL = 	'ADD_FAIL'						#Falha ao adicionar o usuário no sistema
+RM_SUCCES = 'RM_SUCCES'						#Usuário removido com sucesso
+RM_FAIL = 'RM_FAIL'							#Falha ao remover usuário
+PASSWD_SUCCESS = 'PASSWD_SUCCESS'			#Sucesso ao redefinir senha
+PASSWD_FAIL = 'PASSWD_FAIL'					#Falha ao redefinir senha
 
 login = False					 	#Verfica se o usuário está conectado ao servidor
 user = ''							#Usuário que está logado no momento da execução
@@ -184,7 +188,6 @@ while True:
 			ftp_socket.send(request)
 		else:				#Não encontrou o arquivo
 			print('Arquivo não encontrado')
-			continue
 
 		#Renicia a conexão com o servidor para iniciar o upload
 		try:	
@@ -204,7 +207,60 @@ while True:
 			print('Upload terminado com sucesso!')
 		else:
 			print('Falha ao fazer Upload do arquivo ' + content_request[1])
+
+	elif content_request[0] == 'adduser':
+
+		if login == False:
+			print('Você não tem permissao para o comando: ' + content_request[0] + ' - Faça o login $> login <user> <passwd>')
 			continue
+		elif user != 'admin':
+			print('Somente o adminsitrador pode realizar esse comando: ' + content_request[0])
+			continue
+
+		ftp_socket.send(request)		#Envia a requisição
+		msg = ftp_socket.recv(1024)		#Recebe a resposta
+		id_msg = str(msg.decode('utf-8'))
+
+		if id_msg == ADD_SUCCESS:
+			print('Usuário ' + content_request[1] + ' Adicionado com sucesso')
+			print('Senha default para o novo usuário: pingacomlimao')
+		else:
+			print('Falha ao adicionar usuário ' + content_request[1] + ' ou login já existente')
+
+
+	elif content_request[0] == 'removeuser':	#Comando para remover usuário
+
+		if login == False:
+			print('Você não tem permissao para o comando: ' + content_request[0] + ' - Faça o login $> login <user> <passwd>')
+			continue
+		elif user != 'admin':
+			print('Somente o adminsitrador pode realizar esse comando: ' + content_request[0])
+			continue
+
+		ftp_socket.send(request)		#Envia a requisição
+		msg = ftp_socket.recv(1024)		#Recebe a resposta
+		id_msg = str(msg.decode('utf-8'))
+
+		if id_msg == RM_SUCCES:
+			print('Usuário ' + content_request[1] + ' Removido com sucesso')
+		else:
+			print('Falha ao remover usuário ' + content_request[1] + ' ou usuário inexistente')
+
+	elif content_request[0] == 'passwd':
+
+		if login == False:
+			print('Você não tem permissao para o comando: ' + content_request[0] + ' - Faça o login $> login <user> <passwd>')
+			continue
+
+		request += ' ' + user
+		ftp_socket.send(request)		#Envia a requisição
+		msg = ftp_socket.recv(1024)		#Recebe a resposta
+		id_msg = str(msg.decode('utf-8'))
+
+		if id_msg == PASSWD_SUCCESS:
+			print('Senha atualizada com seucesso')
+		else:
+			print('Falha ao redifinir senha')
 
 	elif content_request[0] == 'q' or content_request[0] == 'quit':
 		ftp_socket.close()
