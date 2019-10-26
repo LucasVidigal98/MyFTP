@@ -81,6 +81,7 @@ def add_user(user):
 		""", (user,))
 
 	if len(cursor.fetchall()) > 0:	#Encontrou usuário no servidor
+		print('aqui')
 		return False
 
 	#Tenta adicionar o user no banco. "pingacomlimao" = senha default para um usuario cadastrado

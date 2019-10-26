@@ -1,2 +1,0 @@
-admin admin
-fulano1 123
