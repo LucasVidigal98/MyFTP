@@ -27,14 +27,32 @@ PASSWD_FAIL = 'PASSWD_FAIL'					#Falha ao redefinir senha
 login = False					 	#Verfica se o usuário está conectado ao servidor
 user = ''							#Usuário que está logado no momento da execução
 
+succefull = False
+count = 0
+
 #Tenta fazer conexão com o servidor
-try:
-	ftp_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-	ftp_socket.connect(addr)
-	print('Conectado com sucesso!!')
-except:
-	print('Erro ao conetar ao com o servidor')
-	exit(1)
+
+while succefull == False:
+
+	if count == 5:
+		print('Numero de tentativas de conexão extrapolado')
+		exit(1)
+
+	try:
+		ftp_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+		ftp_socket.connect(addr)
+		print('Conectado com sucesso!!')
+		succefull = True
+	except:
+		count += 1
+		print('Erro ao conetar ao com o servidor - Tentativa ' + str(count) + ' de 5\n')
+		try:
+			HOST = raw_input('IP Server: ')
+			PORT = int(input('Port: '))
+			addr = (HOST, PORT)
+		except:
+			count += 1
+			continue
 
 while True:
 
@@ -172,7 +190,7 @@ while True:
 			request = 	'put ' + content_request[1] + ' ' + user
 		else:
 			request += ' ' + user
-		
+
 		exists = False
 		msg_file = ''
 
@@ -185,10 +203,11 @@ while True:
 			exists = False
 			continue
 
-		if exists == True:	#Encontrou o arquivo, avisa o servidor que o client irá realizar um 'PUT'
+		if exists == True and len(msg_file) > 0:	#Encontrou o arquivo, avisa o servidor que o client irá realizar um 'PUT'
 			ftp_socket.send(request)
 		else:				#Não encontrou o arquivo
-			print('Arquivo não encontrado')
+			print('Arquivo não encontrado ou vazio')
+			continue
 
 		#Renicia a conexão com o servidor para iniciar o upload
 		try:	
@@ -208,6 +227,7 @@ while True:
 			print('Upload terminado com sucesso!')
 		else:
 			print('Falha ao fazer Upload do arquivo ' + content_request[1])
+			continue
 
 	elif content_request[0] == 'adduser':
 
