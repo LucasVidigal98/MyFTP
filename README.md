@@ -23,6 +23,11 @@ O protocolo MyFTP implementa os seguintes comandos:
 + ls: O comando ls busca o nome de todos os arquivos na pasta do servidor e 
   mostra para o cliente.
 
++ adduser: O comando adduser adiciona um usuário no servidor com uma senha defualt, apenas o usuario administrador pode realizar esse comando.
+
++ removeuser: O comando removeuser remove um usuário do servidor, apenas o usuario administrador pode realizar esse comando.
+
++ passwd: Comando passwd faz com que o usuário redefina sua senha.
 
 Todos os comandos devem tratam possíveis erros, tais como: usuário/senha 
 incorreta ou nome de arquivo inexistente. Não navega nas pastas. 
